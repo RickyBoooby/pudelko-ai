@@ -13,26 +13,22 @@
       --shadow: 0 10px 20px rgba(0,0,0,0.1);
       --card-bg: #f9f9f9;
     }
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Quicksand', sans-serif, Arial;
     }
-
     body {
       background-color: var(--bg-color);
       color: var(--text-color);
       padding: 20px;
     }
-
     .container {
       max-width: 800px;
       margin: 0 auto;
       position: relative;
     }
-
     .ai-box {
       background: var(--bg-color);
       border-radius: 15px;
@@ -41,7 +37,6 @@
       transition: all 0.3s ease;
       margin-bottom: 20px;
     }
-
     .ai-box-header {
       background: var(--primary-color);
       color: white;
@@ -50,19 +45,16 @@
       justify-content: space-between;
       align-items: center;
     }
-
     .ai-box-title {
       font-size: 22px;
       font-weight: 600;
     }
-
     .ai-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
       gap: 15px;
       padding: 20px;
     }
-
     .ai-tool {
       display: flex;
       flex-direction: column;
@@ -77,12 +69,10 @@
       overflow: hidden;
       height: 100px;
     }
-
     .ai-tool:hover {
       transform: translateY(-5px);
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
-
     .ai-tool:before {
       content: '';
       position: absolute;
@@ -94,24 +84,20 @@
       transform: scaleX(0);
       transition: transform 0.3s ease;
     }
-
     .ai-tool:hover:before {
       transform: scaleX(1);
     }
-
     .ai-icon {
       width: 40px;
       height: 40px;
       margin-bottom: 10px;
       object-fit: contain;
     }
-
     .ai-name {
       font-weight: 600;
       text-align: center;
       font-size: 14px;
     }
-
     .toggle-box {
       background: none;
       border: none;
@@ -120,16 +106,13 @@
       font-size: 20px;
       transition: transform 0.3s ease;
     }
-
     .toggle-box.open {
       transform: rotate(180deg);
     }
-
     .controls {
       display: flex;
       gap: 10px;
     }
-
     .download-btn {
       background: rgba(255,255,255,0.2);
       border: none;
@@ -142,37 +125,30 @@
       align-items: center;
       gap: 5px;
     }
-
     .download-btn:hover {
       background: rgba(255,255,255,0.3);
     }
-
     .ai-content {
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.5s ease;
     }
-
     .ai-content.open {
       max-height: 1000px;
     }
-
     /* Responsywność dla różnych rozmiarów ekranów */
     @media (max-width: 600px) {
       .ai-grid {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
       }
-      
       .ai-tool {
         height: 90px;
       }
     }
-    
     @media (max-width: 400px) {
       .ai-grid {
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
       }
-      
       .ai-name {
         font-size: 12px;
       }
@@ -220,17 +196,17 @@
         {
           name: "ChatGPT",
           url: "https://chat.openai.com",
-          icon: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" // Przykładowa ścieżka
+          icon: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg"
         },
         {
           name: "Claude",
           url: "https://claude.ai",
-          icon: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Claude_AI_logo.svg" // Przykładowa ścieżka
+          icon: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Claude_AI_logo.svg"
         },
         {
           name: "Grok",
           url: "https://grok.x.com",
-          icon: "/icons/grok-icon.png" // Lokalna ścieżka - trzeba utworzyć folder icons
+          icon: "/icons/grok-icon.png" // Lokalna ścieżka
         },
         {
           name: "DeepSeek",
@@ -284,11 +260,11 @@
           toolElement.target = "_blank";
           toolElement.className = "ai-tool";
           
-          // Sprawdź, czy ścieżka do ikony istnieje, jeśli nie, użyj placeholdera
-          const iconSrc = tool.icon || `/api/placeholder/40/40`;
+          // Jeśli nie podano ścieżki do ikony, użyjemy domyślnej
+          const iconSrc = tool.icon ? tool.icon : '/icons/default-icon.png';
           
           toolElement.innerHTML = `
-            <img src="${iconSrc}" alt="${tool.name}" class="ai-icon" onerror="this.src='/api/placeholder/40/40'"/>
+            <img src="${iconSrc}" alt="${tool.name}" class="ai-icon" onerror="this.onerror=null;this.src='/icons/default-icon.png';"/>
             <span class="ai-name">${tool.name}</span>
           `;
           
@@ -318,7 +294,7 @@
       // Renderuj narzędzia przy załadowaniu strony
       renderAiTools();
       
-      // Otwórz domyślnie
+      // Otwórz domyślnie panel z narzędziami
       aiContent.classList.add('open');
       toggleBox.classList.add('open');
       
@@ -328,7 +304,8 @@
       });
       
       downloadBtn.addEventListener('click', function() {
-        // W wersji produkcyjnej tutaj można zaimplementować logikę pobierania aplikacji
+        // Obecnie kliknięcie przycisku wywołuje alert.
+        // Możesz tutaj zaimplementować logikę pobierania pliku lub przekierowanie do innej strony.
         alert('Funkcja pobierania będzie dostępna wkrótce!');
       });
     });
