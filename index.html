@@ -243,7 +243,7 @@
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        <span>Otwórz w nowym oknie</span>
+                        Otwórz w nowym oknie
                     </button>
                     <button class="toggle-box" id="toggleBox">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -267,12 +267,6 @@
             const aiContent = document.getElementById('aiContent');
             const openBtn = document.getElementById('downloadBtn');
             const aiGrid = document.getElementById('aiGrid');
-
-            // Sprawdzenie, czy jesteśmy w trybie standalone
-            const isStandalone = window.opener !== null || window.location.hash === '#standalone';
-            if (isStandalone) {
-                document.body.classList.add('standalone');
-            }
 
             // Konfiguracja narzędzi AI z zewnętrznymi adresami ikon
             const aiTools = [
@@ -345,9 +339,9 @@
                     const iconSrc = tool.icon ? tool.icon : 'https://via.placeholder.com/40?text=Icon';
 
                     toolElement.innerHTML = `
-                        <img src="${iconSrc}" alt="${tool.name}" class="ai-icon" onerror="this.onerror=null;this.src='https://via.placeholder.com/40?text=Icon';"/>
-                        <span class="ai-name">${tool.name}</span>
-                    `;
+            <img src="${iconSrc}" alt="${tool.name}" class="ai-icon" onerror="this.onerror=null;this.src='https://via.placeholder.com/40?text=Icon';"/>
+            <span class="ai-name">${tool.name}</span>
+          `;
 
                     aiGrid.appendChild(toolElement);
                 });
@@ -368,39 +362,27 @@
 
             renderAiTools();
 
-            // Funkcja do obliczania optymalnego rozmiaru okna
-            function calculateWindowSize() {
-                // Szacujemy liczbę rzędów w zależności od liczby narzędzi
-                const itemsPerRow = window.innerWidth < 400 ? 3 : (window.innerWidth < 600 ? 4 : 5);
-                const rows = Math.ceil(aiTools.length / itemsPerRow);
-                
-                // Szacujemy wysokość (wysokość nagłówka + wysokość siatki)
-                const headerHeight = 70; // przybliżona wysokość nagłówka
-                const rowHeight = 120; // przybliżona wysokość rzędu
-                const padding = 60; // dodatkowe miejsce na padding i margines
-                
-                // Szacujemy szerokość dla minimum 3 narzędzi w rzędzie
-                const width = Math.max(400, Math.min(800, window.innerWidth * 0.8));
-                const height = headerHeight + (rows * rowHeight) + padding;
-                
-                return { width, height };
-            }
-
-            // Obsługa przycisku "Otwórz" - otwiera nowe okno o odpowiednim rozmiarze
+            // Obsługa przycisku "Otwórz" – otwiera nowe okno dopasowane do wymiarów pudełka
             openBtn.addEventListener('click', function () {
-                const { width, height } = calculateWindowSize();
-                const windowFeatures = `width=${width},height=${height},resizable=yes,scrollbars=yes`;
-                window.open(window.location.href, '_blank', windowFeatures);
+                const box = document.querySelector('.ai-box');
+                const rect = box.getBoundingClientRect();
+                const width = Math.round(rect.width);
+                const height = Math.round(rect.height);
+                window.open(window.location.href, '_blank', `width=${width},height=${height + 75}`);
             });
 
             // Obsługa przełącznika panelu
             toggleBox.addEventListener('click', function () {
-                aiContent.classList.toggle('collapsed');
+                aiContent.classList.toggle('open');
                 this.classList.toggle('open');
             });
 
-            // Ustawienie początkowego stanu panelu - zawsze rozwinięty
+            // Ustawienie początkowego stanu panelu bez migotania
+            aiContent.style.transition = 'none';
+            aiContent.classList.add('open');
             toggleBox.classList.add('open');
+            void aiContent.offsetWidth;
+            aiContent.style.transition = '';
         });
     </script>
 </body>
