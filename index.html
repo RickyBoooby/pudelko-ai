@@ -157,9 +157,24 @@
       max-height: 1000px;
     }
 
+    /* Responsywność dla różnych rozmiarów ekranów */
     @media (max-width: 600px) {
       .ai-grid {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      }
+      
+      .ai-tool {
+        height: 90px;
+      }
+    }
+    
+    @media (max-width: 400px) {
+      .ai-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      }
+      
+      .ai-name {
+        font-size: 12px;
       }
     }
   </style>
@@ -186,51 +201,8 @@
         </div>
       </div>
       <div class="ai-content" id="aiContent">
-        <div class="ai-grid">
-          <a href="https://chat.openai.com" target="_blank" class="ai-tool">
-            <img src="/api/placeholder/40/40" alt="ChatGPT" class="ai-icon" />
-            <span class="ai-name">ChatGPT</span>
-          </a>
-          <a href="https://claude.ai" target="_blank" class="ai-tool">
-            <img src="/api/placeholder/40/40" alt="Claude" class="ai-icon" />
-            <span class="ai-name">Claude</span>
-          </a>
-          <a href="https://grok.x.com" target="_blank" class="ai-tool">
-            <img src="/api/placeholder/40/40" alt="Grok" class="ai-icon" />
-            <span class="ai-name">Grok</span>
-          </a>
-          <a href="https://chat.deepseek.com/" target="_blank" class="ai-tool">
-            <img src="/api/placeholder/40/40" alt="DeepSeek" class="ai-icon" />
-            <span class="ai-name">DeepSeek</span>
-          </a>
-          <a href="https://gemini.google.com" target="_blank" class="ai-tool">
-            <img src="/api/placeholder/40/40" alt="Gemini" class="ai-icon" />
-            <span class="ai-name">Gemini</span>
-          </a>
-          <a href="https://aistudio.google.com/" target="_blank" class="ai-tool">
-            <img src="/api/placeholder/40/40" alt="Google AI Studio" class="ai-icon" />
-            <span class="ai-name">Google AI Studio</span>
-          </a>
-          <a href="https://copilot.microsoft.com/" target="_blank" class="ai-tool">
-            <img src="/api/placeholder/40/40" alt="Microsoft Copilot" class="ai-icon" />
-            <span class="ai-name">Microsoft Copilot</span>
-          </a>
-          <a href="https://perplexity.ai" target="_blank" class="ai-tool">
-            <img src="/api/placeholder/40/40" alt="Perplexity" class="ai-icon" />
-            <span class="ai-name">Perplexity</span>
-          </a>
-          <a href="https://pi.ai" target="_blank" class="ai-tool">
-            <img src="/api/placeholder/40/40" alt="Pi" class="ai-icon" />
-            <span class="ai-name">Pi</span>
-          </a>
-          <a href="https://huggingface.co/chat" target="_blank" class="ai-tool">
-            <img src="/api/placeholder/40/40" alt="HuggingChat" class="ai-icon" />
-            <span class="ai-name">HuggingChat</span>
-          </a>
-          <a href="https://poe.com" target="_blank" class="ai-tool">
-            <img src="/api/placeholder/40/40" alt="Poe" class="ai-icon" />
-            <span class="ai-name">Poe</span>
-          </a>
+        <div class="ai-grid" id="aiGrid">
+          <!-- Elementy będą dodawane dynamicznie przez JavaScript -->
         </div>
       </div>
     </div>
@@ -241,6 +213,110 @@
       const toggleBox = document.getElementById('toggleBox');
       const aiContent = document.getElementById('aiContent');
       const downloadBtn = document.getElementById('downloadBtn');
+      const aiGrid = document.getElementById('aiGrid');
+      
+      // Konfiguracja narzędzi AI - wszystkie ikony w jednym miejscu
+      const aiTools = [
+        {
+          name: "ChatGPT",
+          url: "https://chat.openai.com",
+          icon: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" // Przykładowa ścieżka
+        },
+        {
+          name: "Claude",
+          url: "https://claude.ai",
+          icon: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Claude_AI_logo.svg" // Przykładowa ścieżka
+        },
+        {
+          name: "Grok",
+          url: "https://grok.x.com",
+          icon: "/icons/grok-icon.png" // Lokalna ścieżka - trzeba utworzyć folder icons
+        },
+        {
+          name: "DeepSeek",
+          url: "https://chat.deepseek.com/",
+          icon: "/icons/deepseek-icon.png"
+        },
+        {
+          name: "Gemini",
+          url: "https://gemini.google.com",
+          icon: "/icons/gemini-icon.png"
+        },
+        {
+          name: "Google AI Studio",
+          url: "https://aistudio.google.com/",
+          icon: "/icons/google-ai-studio-icon.png"
+        },
+        {
+          name: "Microsoft Copilot",
+          url: "https://copilot.microsoft.com/",
+          icon: "/icons/copilot-icon.png"
+        },
+        {
+          name: "Perplexity",
+          url: "https://perplexity.ai",
+          icon: "/icons/perplexity-icon.png"
+        },
+        {
+          name: "Pi",
+          url: "https://pi.ai",
+          icon: "/icons/pi-icon.png"
+        },
+        {
+          name: "HuggingChat",
+          url: "https://huggingface.co/chat",
+          icon: "/icons/huggingchat-icon.png"
+        },
+        {
+          name: "Poe",
+          url: "https://poe.com",
+          icon: "/icons/poe-icon.png"
+        }
+      ];
+      
+      // Funkcja generująca narzędzia AI
+      function renderAiTools() {
+        aiGrid.innerHTML = ''; // Wyczyść grid
+        
+        aiTools.forEach(tool => {
+          const toolElement = document.createElement('a');
+          toolElement.href = tool.url;
+          toolElement.target = "_blank";
+          toolElement.className = "ai-tool";
+          
+          // Sprawdź, czy ścieżka do ikony istnieje, jeśli nie, użyj placeholdera
+          const iconSrc = tool.icon || `/api/placeholder/40/40`;
+          
+          toolElement.innerHTML = `
+            <img src="${iconSrc}" alt="${tool.name}" class="ai-icon" onerror="this.src='/api/placeholder/40/40'"/>
+            <span class="ai-name">${tool.name}</span>
+          `;
+          
+          aiGrid.appendChild(toolElement);
+        });
+      }
+      
+      // Funkcja do dodawania nowego narzędzia
+      window.addAiTool = function(name, url, iconPath) {
+        aiTools.push({
+          name: name,
+          url: url,
+          icon: iconPath
+        });
+        renderAiTools();
+      };
+      
+      // Funkcja do usuwania narzędzia po nazwie
+      window.removeAiTool = function(name) {
+        const index = aiTools.findIndex(tool => tool.name === name);
+        if (index !== -1) {
+          aiTools.splice(index, 1);
+          renderAiTools();
+        }
+      };
+      
+      // Renderuj narzędzia przy załadowaniu strony
+      renderAiTools();
       
       // Otwórz domyślnie
       aiContent.classList.add('open');
