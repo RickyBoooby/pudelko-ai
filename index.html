@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI ToolBox</title>
     <!-- Dodajemy favicon, aby przeglądarka nie szukała domyślnego zasobu -->
     <link rel="icon" href="https://via.placeholder.com/16" type="image/x-icon">
@@ -25,28 +24,26 @@
             font-family: 'Quicksand', sans-serif, Arial;
         }
 
-       body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
 
-.container {
-    flex: 1;
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    box-sizing: border-box;
-}
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
 
-.ai-box {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
+        .ai-box {
+            background: var(--bg-color);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
 
         .ai-box-header {
             background: var(--primary-color);
@@ -225,7 +222,7 @@
             const aiGrid = document.getElementById('aiGrid');
 
             // Konfiguracja narzędzi AI z zewnętrznymi adresami ikon
-          const aiTools = [
+            const aiTools = [
                 {
                     name: "ChatGPT",
                     url: "https://chat.openai.com",
@@ -318,21 +315,14 @@
 
             renderAiTools();
 
+            // Obsługa przycisku "Otwórz" – otwiera nowe okno dopasowane do wymiarów pudełka
             openBtn.addEventListener('click', function () {
-    const body = document.querySelector('body');
-    const container = document.querySelector('.container');
-    
-    // Oblicz pełne wymiary dokumentu
-    const width = container.scrollWidth;
-    const height = container.scrollHeight + 50; // Dodaj margines na nagłówek
-    
-    // Otwórz nowe okno z dynamicznym dopasowaniem
-    const newWindow = window.open(
-        window.location.href, 
-        '_blank', 
-        `width=${width},height=${height},scrollbars=no,resizable=yes`
-    );
-});
+                const box = document.querySelector('.ai-box');
+                const rect = box.getBoundingClientRect();
+                const width = Math.round(rect.width);
+                const height = Math.round(rect.height);
+                window.open(window.location.href, '_blank', `width=${width},height=${height + 75}`);
+            });
 
             // Obsługa przełącznika panelu
             toggleBox.addEventListener('click', function () {
