@@ -27,7 +27,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            padding: 20px;
+            padding: 10px;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -164,14 +164,13 @@
         }
 
         .ai-content {
-            max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease;
             flex-grow: 1;
         }
 
-        .ai-content.open {
-            max-height: 2000px;
+        .ai-content.collapsed {
+            max-height: 0;
         }
 
         /* Responsywność */
@@ -225,7 +224,7 @@
             border-radius: 0;
         }
 
-        .standalone .ai-content.open {
+        .standalone .ai-content {
             overflow-y: auto;
         }
     </style>
@@ -270,7 +269,7 @@
             const aiGrid = document.getElementById('aiGrid');
 
             // Sprawdzenie, czy jesteśmy w trybie standalone
-            const isStandalone = window.location.hash === '#standalone';
+            const isStandalone = window.opener !== null || window.location.hash === '#standalone';
             if (isStandalone) {
                 document.body.classList.add('standalone');
             }
@@ -369,34 +368,39 @@
 
             renderAiTools();
 
-            // Obsługa przycisku "Otwórz" – otwiera nowe okno w trybie standalone
-            openBtn.addEventListener('click', function () {
-                const newUrl = window.location.href.split('#')[0] + '#standalone';
-                const newWindow = window.open(newUrl, '_blank');
+            // Funkcja do obliczania optymalnego rozmiaru okna
+            function calculateWindowSize() {
+                // Szacujemy liczbę rzędów w zależności od liczby narzędzi
+                const itemsPerRow = window.innerWidth < 400 ? 3 : (window.innerWidth < 600 ? 4 : 5);
+                const rows = Math.ceil(aiTools.length / itemsPerRow);
                 
-                // Dopasuj rozmiar okna do zawartości po załadowaniu
-                if (newWindow) {
-                    newWindow.addEventListener('load', function() {
-                        // Komunikacja między oknami nie jest potrzebna, okno dostosuje się samo
-                    });
-                }
+                // Szacujemy wysokość (wysokość nagłówka + wysokość siatki)
+                const headerHeight = 70; // przybliżona wysokość nagłówka
+                const rowHeight = 120; // przybliżona wysokość rzędu
+                const padding = 60; // dodatkowe miejsce na padding i margines
+                
+                // Szacujemy szerokość dla minimum 3 narzędzi w rzędzie
+                const width = Math.max(400, Math.min(800, window.innerWidth * 0.8));
+                const height = headerHeight + (rows * rowHeight) + padding;
+                
+                return { width, height };
+            }
+
+            // Obsługa przycisku "Otwórz" - otwiera nowe okno o odpowiednim rozmiarze
+            openBtn.addEventListener('click', function () {
+                const { width, height } = calculateWindowSize();
+                const windowFeatures = `width=${width},height=${height},resizable=yes,scrollbars=yes`;
+                window.open(window.location.href, '_blank', windowFeatures);
             });
 
             // Obsługa przełącznika panelu
             toggleBox.addEventListener('click', function () {
-                aiContent.classList.toggle('open');
+                aiContent.classList.toggle('collapsed');
                 this.classList.toggle('open');
             });
 
-            // Ustawienie początkowego stanu panelu
-            if (isStandalone || window.innerWidth > 400) {
-                // W trybie standalone lub na szerszych ekranach otwieramy panel od razu
-                aiContent.style.transition = 'none';
-                aiContent.classList.add('open');
-                toggleBox.classList.add('open');
-                void aiContent.offsetWidth;
-                aiContent.style.transition = '';
-            }
+            // Ustawienie początkowego stanu panelu - zawsze rozwinięty
+            toggleBox.classList.add('open');
         });
     </script>
 </body>
