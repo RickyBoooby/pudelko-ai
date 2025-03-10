@@ -28,9 +28,13 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
         }
 
         .container {
+            width: 100%;
             max-width: 800px;
             margin: 0 auto;
             position: relative;
@@ -43,6 +47,9 @@
             overflow: hidden;
             transition: all 0.3s ease;
             margin-bottom: 20px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         .ai-box-header {
@@ -50,13 +57,16 @@
             color: white;
             padding: 15px 20px;
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
         }
 
         .ai-box-title {
             font-size: 22px;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .ai-grid {
@@ -122,6 +132,7 @@
             cursor: pointer;
             font-size: 20px;
             transition: transform 0.3s ease;
+            padding: 5px;
         }
 
         .toggle-box.open {
@@ -131,6 +142,7 @@
         .controls {
             display: flex;
             gap: 10px;
+            flex-wrap: nowrap;
         }
 
         .download-btn {
@@ -144,6 +156,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            white-space: nowrap;
         }
 
         .download-btn:hover {
@@ -154,10 +167,11 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease;
+            flex-grow: 1;
         }
 
         .ai-content.open {
-            max-height: 1000px;
+            max-height: 2000px;
         }
 
         /* Responsywność */
@@ -171,6 +185,18 @@
             }
         }
 
+        @media (max-width: 450px) {
+            .ai-box-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
         @media (max-width: 400px) {
             .ai-grid {
                 grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
@@ -179,6 +205,28 @@
             .ai-name {
                 font-size: 12px;
             }
+        }
+
+        /* Dodane style dla trybu standalone */
+        body.standalone {
+            padding: 0;
+            overflow: auto;
+        }
+
+        .standalone .container {
+            height: 100vh;
+            margin: 0;
+            max-width: none;
+        }
+
+        .standalone .ai-box {
+            height: 100vh;
+            margin-bottom: 0;
+            border-radius: 0;
+        }
+
+        .standalone .ai-content.open {
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -196,7 +244,7 @@
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        Otwórz w nowym oknie
+                        <span>Otwórz w nowym oknie</span>
                     </button>
                     <button class="toggle-box" id="toggleBox">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -220,6 +268,12 @@
             const aiContent = document.getElementById('aiContent');
             const openBtn = document.getElementById('downloadBtn');
             const aiGrid = document.getElementById('aiGrid');
+
+            // Sprawdzenie, czy jesteśmy w trybie standalone
+            const isStandalone = window.location.hash === '#standalone';
+            if (isStandalone) {
+                document.body.classList.add('standalone');
+            }
 
             // Konfiguracja narzędzi AI z zewnętrznymi adresami ikon
             const aiTools = [
@@ -292,9 +346,9 @@
                     const iconSrc = tool.icon ? tool.icon : 'https://via.placeholder.com/40?text=Icon';
 
                     toolElement.innerHTML = `
-            <img src="${iconSrc}" alt="${tool.name}" class="ai-icon" onerror="this.onerror=null;this.src='https://via.placeholder.com/40?text=Icon';"/>
-            <span class="ai-name">${tool.name}</span>
-          `;
+                        <img src="${iconSrc}" alt="${tool.name}" class="ai-icon" onerror="this.onerror=null;this.src='https://via.placeholder.com/40?text=Icon';"/>
+                        <span class="ai-name">${tool.name}</span>
+                    `;
 
                     aiGrid.appendChild(toolElement);
                 });
@@ -315,13 +369,17 @@
 
             renderAiTools();
 
-            // Obsługa przycisku "Otwórz" – otwiera nowe okno dopasowane do wymiarów pudełka
+            // Obsługa przycisku "Otwórz" – otwiera nowe okno w trybie standalone
             openBtn.addEventListener('click', function () {
-                const box = document.querySelector('.ai-box');
-                const rect = box.getBoundingClientRect();
-                const width = Math.round(rect.width);
-                const height = Math.round(rect.height);
-                window.open(window.location.href, '_blank', `width=${width},height=${height + 75}`);
+                const newUrl = window.location.href.split('#')[0] + '#standalone';
+                const newWindow = window.open(newUrl, '_blank');
+                
+                // Dopasuj rozmiar okna do zawartości po załadowaniu
+                if (newWindow) {
+                    newWindow.addEventListener('load', function() {
+                        // Komunikacja między oknami nie jest potrzebna, okno dostosuje się samo
+                    });
+                }
             });
 
             // Obsługa przełącznika panelu
@@ -330,12 +388,15 @@
                 this.classList.toggle('open');
             });
 
-            // Ustawienie początkowego stanu panelu bez migotania
-            aiContent.style.transition = 'none';
-            aiContent.classList.add('open');
-            toggleBox.classList.add('open');
-            void aiContent.offsetWidth;
-            aiContent.style.transition = '';
+            // Ustawienie początkowego stanu panelu
+            if (isStandalone || window.innerWidth > 400) {
+                // W trybie standalone lub na szerszych ekranach otwieramy panel od razu
+                aiContent.style.transition = 'none';
+                aiContent.classList.add('open');
+                toggleBox.classList.add('open');
+                void aiContent.offsetWidth;
+                aiContent.style.transition = '';
+            }
         });
     </script>
 </body>
