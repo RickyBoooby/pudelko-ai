@@ -1,314 +1,343 @@
 <!DOCTYPE html>
 <html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pudełko AI</title>
-  <style>
-    :root {
-      --primary-color: #d32f2f;
-      --hover-color: #b71c1c;
-      --text-color: #333;
-      --bg-color: #fff;
-      --shadow: 0 10px 20px rgba(0,0,0,0.1);
-      --card-bg: #f9f9f9;
-    }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Quicksand', sans-serif, Arial;
-    }
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      padding: 20px;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      position: relative;
-    }
-    .ai-box {
-      background: var(--bg-color);
-      border-radius: 15px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      transition: all 0.3s ease;
-      margin-bottom: 20px;
-    }
-    .ai-box-header {
-      background: var(--primary-color);
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .ai-box-title {
-      font-size: 22px;
-      font-weight: 600;
-    }
-    .ai-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 15px;
-      padding: 20px;
-    }
-    .ai-tool {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: var(--card-bg);
-      border-radius: 10px;
-      padding: 15px 10px;
-      transition: all 0.2s ease;
-      text-decoration: none;
-      color: var(--text-color);
-      position: relative;
-      overflow: hidden;
-      height: 100px;
-    }
-    .ai-tool:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .ai-tool:before {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background-color: var(--primary-color);
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-    }
-    .ai-tool:hover:before {
-      transform: scaleX(1);
-    }
-    .ai-icon {
-      width: 40px;
-      height: 40px;
-      margin-bottom: 10px;
-      object-fit: contain;
-    }
-    .ai-name {
-      font-weight: 600;
-      text-align: center;
-      font-size: 14px;
-    }
-    .toggle-box {
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      font-size: 20px;
-      transition: transform 0.3s ease;
-    }
-    .toggle-box.open {
-      transform: rotate(180deg);
-    }
-    .controls {
-      display: flex;
-      gap: 10px;
-    }
-    .download-btn {
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .download-btn:hover {
-      background: rgba(255,255,255,0.3);
-    }
-    .ai-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.5s ease;
-    }
-    .ai-content.open {
-      max-height: 1000px;
-    }
-    /* Responsywność dla różnych rozmiarów ekranów */
-    @media (max-width: 600px) {
-      .ai-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      }
-      .ai-tool {
-        height: 90px;
-      }
-    }
-    @media (max-width: 400px) {
-      .ai-grid {
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-      }
-      .ai-name {
-        font-size: 12px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="ai-box">
-      <div class="ai-box-header">
-        <h2 class="ai-box-title">Pudełko AI</h2>
-        <div class="controls">
-          <button class="download-btn" id="downloadBtn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Pobierz
-          </button>
-          <button class="toggle-box" id="toggleBox">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="ai-content" id="aiContent">
-        <div class="ai-grid" id="aiGrid">
-          <!-- Elementy będą dodawane dynamicznie przez JavaScript -->
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const toggleBox = document.getElementById('toggleBox');
-      const aiContent = document.getElementById('aiContent');
-      const downloadBtn = document.getElementById('downloadBtn');
-      const aiGrid = document.getElementById('aiGrid');
-      
-      // Konfiguracja narzędzi AI - wszystkie ikony w jednym miejscu
-     const aiTools = [
-  {
-    name: "ChatGPT",
-    url: "https://chat.openai.com",
-    icon: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg"
-  },
-  {
-    name: "Claude",
-    url: "https://claude.ai",
-    icon: "https://www.fahimai.com/wp-content/uploads/2024/06/Untitled-design-7.png"
-  },
-  {
-    name: "Grok",
-    url: "https://grok.x.com",
-    icon: "https://1000logos.net/wp-content/uploads/2025/02/Grok-Logo.png"
-  },
-  {
-    name: "DeepSeek",
-    url: "https://chat.deepseek.com/",
-    icon: "https://images.seeklogo.com/logo-png/61/1/deepseek-ai-icon-logo-png_seeklogo-611473.png"
-  },
-  {
-    name: "Gemini",
-    url: "https://gemini.google.com",
-    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Google_Gemini_logo.svg/330px-Google_Gemini_logo.svg.png"
-  },
-  {
-    name: "Google AI Studio",
-    url: "https://aistudio.google.com/",
-    icon: "https://ai.google/favicon.ico"
-  },
-  {
-    name: "Microsoft Copilot",
-    url: "https://copilot.microsoft.com/",
-    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Microsoft_Copilot.svg/180px-Microsoft_Copilot.svg.png"
-  },
-  {
-    name: "Perplexity",
-    url: "https://perplexity.ai",
-    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Perplexity_AI_logo.svg/640px-Perplexity_AI_logo.svg.png"
-  },
-  {
-    name: "Pi",
-    url: "https://pi.ai",
-    icon: "https://i.imgur.com/O4BYSC7.png"
-  },
-  {
-    name: "HuggingChat",
-    url: "https://huggingface.co/chat",
-    icon: "https://tuwebcreativa.com/wp-content/uploads/2023/04/HuggingChat-Alternativa-a-ChatGPT-720x457.png"
-  },
-  {
-    name: "Poe",
-    url: "https://poe.com",
-    icon: "https://www.technologymath.com/wp-content/uploads/2024/05/Poe-ai.jpg"
-  }
-];
-      
-      // Funkcja generująca narzędzia AI
-      function renderAiTools() {
-        aiGrid.innerHTML = ''; // Wyczyść grid
-        
-        aiTools.forEach(tool => {
-          const toolElement = document.createElement('a');
-          toolElement.href = tool.url;
-          toolElement.target = "_blank";
-          toolElement.className = "ai-tool";
-          
-          // Jeśli nie podano ścieżki do ikony, użyjemy domyślnej
-          const iconSrc = tool.icon ? tool.icon : '/icons/default-icon.png';
-          
-          toolElement.innerHTML = `
-            <img src="${iconSrc}" alt="${tool.name}" class="ai-icon" onerror="this.onerror=null;this.src='/icons/default-icon.png';"/>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pudełko AI</title>
+    <!-- Dodajemy favicon, aby przeglądarka nie szukała domyślnego zasobu -->
+    <link rel="icon" href="https://via.placeholder.com/16" type="image/x-icon">
+    <style>
+        :root {
+            --primary-color: #d32f2f;
+            --hover-color: #b71c1c;
+            --text-color: #333;
+            --bg-color: #fff;
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            --card-bg: #f9f9f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Quicksand', sans-serif, Arial;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .ai-box {
+            background: var(--bg-color);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .ai-box-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-box-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .ai-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .ai-tool {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px 10px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: var(--text-color);
+            position: relative;
+            overflow: hidden;
+            height: 100px;
+        }
+
+        .ai-tool:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .ai-tool:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .ai-tool:hover:before {
+            transform: scaleX(1);
+        }
+
+        .ai-icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+
+        .ai-name {
+            font-weight: 600;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .toggle-box {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-box.open {
+            transform: rotate(180deg);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .download-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .ai-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .ai-content.open {
+            max-height: 1000px;
+        }
+
+        /* Responsywność */
+        @media (max-width: 600px) {
+            .ai-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .ai-tool {
+                height: 90px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .ai-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+
+            .ai-name {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="ai-box">
+            <div class="ai-box-header">
+                <h2 class="ai-box-title">Pudełko AI</h2>
+                <div class="controls">
+                    <button class="download-btn" id="downloadBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Otwórz
+                    </button>
+                    <button class="toggle-box" id="toggleBox">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="ai-content" id="aiContent">
+                <div class="ai-grid" id="aiGrid">
+                    <!-- Elementy będą dodawane dynamicznie przez JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBox = document.getElementById('toggleBox');
+            const aiContent = document.getElementById('aiContent');
+            const openBtn = document.getElementById('downloadBtn');
+            const aiGrid = document.getElementById('aiGrid');
+
+            // Konfiguracja narzędzi AI z zewnętrznymi adresami ikon
+          const aiTools = [
+                {
+                    name: "ChatGPT",
+                    url: "https://chat.openai.com",
+                    icon: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg"
+                },
+                {
+                    name: "Claude",
+                    url: "https://claude.ai",
+                    icon: "https://www.fahimai.com/wp-content/uploads/2024/06/Untitled-design-7.png"
+                },
+                {
+                    name: "Grok",
+                    url: "https://grok.x.com",
+                    icon: "https://1000logos.net/wp-content/uploads/2025/02/Grok-Logo.png"
+                },
+                {
+                    name: "DeepSeek",
+                    url: "https://chat.deepseek.com/",
+                    icon: "https://images.seeklogo.com/logo-png/61/1/deepseek-ai-icon-logo-png_seeklogo-611473.png"
+                },
+                {
+                    name: "Gemini",
+                    url: "https://gemini.google.com",
+                    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Google_Gemini_logo.svg/330px-Google_Gemini_logo.svg.png"
+                },
+                {
+                    name: "Google AI Studio",
+                    url: "https://aistudio.google.com/",
+                    icon: "https://ai.google/favicon.ico"
+                },
+                {
+                    name: "Microsoft Copilot",
+                    url: "https://copilot.microsoft.com/",
+                    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Microsoft_Copilot.svg/180px-Microsoft_Copilot.svg.png"
+                },
+                {
+                    name: "Perplexity",
+                    url: "https://perplexity.ai",
+                    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Perplexity_AI_logo.svg/640px-Perplexity_AI_logo.svg.png"
+                },
+                {
+                    name: "Pi",
+                    url: "https://pi.ai",
+                    icon: "https://i.imgur.com/O4BYSC7.png"
+                },
+                {
+                    name: "HuggingChat",
+                    url: "https://huggingface.co/chat",
+                    icon: "https://tuwebcreativa.com/wp-content/uploads/2023/04/HuggingChat-Alternativa-a-ChatGPT-720x457.png"
+                },
+                {
+                    name: "Poe",
+                    url: "https://poe.com",
+                    icon: "https://www.technologymath.com/wp-content/uploads/2024/05/Poe-ai.jpg"
+                }
+            ];
+
+            // Generowanie elementów narzędzi
+            function renderAiTools() {
+                aiGrid.innerHTML = '';
+                aiTools.forEach(tool => {
+                    const toolElement = document.createElement('a');
+                    toolElement.href = tool.url;
+                    toolElement.target = "_blank";
+                    toolElement.className = "ai-tool";
+
+                    const iconSrc = tool.icon ? tool.icon : 'https://via.placeholder.com/40?text=Icon';
+
+                    toolElement.innerHTML = `
+            <img src="${iconSrc}" alt="${tool.name}" class="ai-icon" onerror="this.onerror=null;this.src='https://via.placeholder.com/40?text=Icon';"/>
             <span class="ai-name">${tool.name}</span>
           `;
-          
-          aiGrid.appendChild(toolElement);
+
+                    aiGrid.appendChild(toolElement);
+                });
+            }
+
+            // Funkcje do dodawania/usuwania narzędzi
+            window.addAiTool = function (name, url, iconPath) {
+                aiTools.push({ name, url, icon: iconPath });
+                renderAiTools();
+            };
+            window.removeAiTool = function (name) {
+                const index = aiTools.findIndex(tool => tool.name === name);
+                if (index !== -1) {
+                    aiTools.splice(index, 1);
+                    renderAiTools();
+                }
+            };
+
+            renderAiTools();
+
+            // Obsługa przycisku "Otwórz" – otwiera nowe okno dopasowane do wymiarów pudełka
+            openBtn.addEventListener('click', function () {
+                const box = document.querySelector('.ai-box');
+                const rect = box.getBoundingClientRect();
+                const width = Math.round(rect.width);
+                const height = Math.round(rect.height);
+                window.open(window.location.href, '_blank', `width=${width},height=${height}`);
+            });
+
+            // Obsługa przełącznika panelu
+            toggleBox.addEventListener('click', function () {
+                aiContent.classList.toggle('open');
+                this.classList.toggle('open');
+            });
+
+            // Ustawienie początkowego stanu panelu bez migotania
+            aiContent.style.transition = 'none';
+            aiContent.classList.add('open');
+            toggleBox.classList.add('open');
+            void aiContent.offsetWidth;
+            aiContent.style.transition = '';
         });
-      }
-      
-      // Funkcja do dodawania nowego narzędzia
-      window.addAiTool = function(name, url, iconPath) {
-        aiTools.push({
-          name: name,
-          url: url,
-          icon: iconPath
-        });
-        renderAiTools();
-      };
-      
-      // Funkcja do usuwania narzędzia po nazwie
-      window.removeAiTool = function(name) {
-        const index = aiTools.findIndex(tool => tool.name === name);
-        if (index !== -1) {
-          aiTools.splice(index, 1);
-          renderAiTools();
-        }
-      };
-      
-      // Renderuj narzędzia przy załadowaniu strony
-      renderAiTools();
-      
-      // Otwórz domyślnie panel z narzędziami
-      aiContent.classList.add('open');
-      toggleBox.classList.add('open');
-      
-      toggleBox.addEventListener('click', function() {
-        aiContent.classList.toggle('open');
-        this.classList.toggle('open');
-      });
-      
-      downloadBtn.addEventListener('click', function() {
-        // Obecnie kliknięcie przycisku wywołuje alert.
-        // Możesz tutaj zaimplementować logikę pobierania pliku lub przekierowanie do innej strony.
-        alert('Funkcja pobierania będzie dostępna wkrótce!');
-      });
-    });
-  </script>
+    </script>
 </body>
+
 </html>
